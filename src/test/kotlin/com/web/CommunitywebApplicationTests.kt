@@ -1,4 +1,4 @@
-package com.example.communityweb
+package com.web
 
 import org.junit.Test
 import org.junit.runner.RunWith

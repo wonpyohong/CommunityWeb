@@ -1,4 +1,4 @@
-package com.example.communityweb
+package com.web
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
