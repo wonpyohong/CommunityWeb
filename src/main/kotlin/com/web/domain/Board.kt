@@ -11,7 +11,7 @@ data class Board(
         @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var idx: Long = 0,
+    val idx: Long = 0,
 
         @Column
     val title: String = "",

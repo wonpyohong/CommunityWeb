@@ -35,6 +35,6 @@ class BoardController {
             model: Model
     ): String {
         model.addAttribute("boardList", boardService.findBoardList(pageable))
-        return "/board/list"    // src/resources/template를 기준으로 데이터를 바인딩할 타깃의 뷰 경로를 지정
+        return "/board/list"    // src/resources/templates를 기준으로 데이터를 바인딩할 타깃의 뷰 경로를 지정
     }
 }
