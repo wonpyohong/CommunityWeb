@@ -5,24 +5,26 @@ import java.io.Serializable
 import java.time.LocalDateTime
 import javax.persistence.*
 
+@Entity
+@Table
 data class User(
         @Id
         @Column
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private var idx: Long = 0,
+        var idx: Long = 0,
 
         @Column
-        private val name: String,
+        val name: String,
 
         @Column
-        private val password: String,
+        val password: String,
 
         @Column
-        private val email: String,
+        val email: String,
 
         @Column
-        private val createdDate: LocalDateTime,
+        val createdDate: LocalDateTime,
 
         @Column
-        private val updatedDate: LocalDateTime
+        val updatedDate: LocalDateTime = LocalDateTime.now()
 ): Serializable
