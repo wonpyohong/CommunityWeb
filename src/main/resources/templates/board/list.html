@@ -31,8 +31,6 @@
                     </tr>
                 </thead>
 
-                <!--/*@thymesVar id="boardList" type="org.springframework.data.domain.Page<Board>"*/-->
-                <!--/*@thymesVar id="board" type="com.web.domain.Board"*/-->
                 <tbody>
                     <tr th:each="board : ${boardList}">
                         <td th:text="${board.idx}"></td>
@@ -45,7 +43,30 @@
             </table>
         </div>
 
-        <!-- Pagination -->
+        <nav aria-label="Page navigation" style="text-align:center;">
+            <ul class="pagination"
+                th:with="startNumber=${T(Math).floor(boardList.number / 10)} * 10 + 1,
+endNumber=(${boardList.totalPages} > ${startNumber} + 9) ? ${startNumber} + 9 : ${boardList.totalPages}">
+
+                <li><a href="/board/list?page=1">&laquo;</a></li>
+                <li th:style="${boardList.first} ? 'display:none'">
+                    <a th:href="@{/board/list(page=${boardList.number})}">&laquo;</a>
+                </li>
+                <li th:each="page : ${#numbers.sequence(startNumber, endNumber)}"
+                    th:class="(${page} == ${boardList.number} + 1) ? 'active' : 'inactive'">
+                    <a th:href="@{/board/list(page=${page})}"
+                       th:text="${page}">
+                        <span class="sr-only"></span>
+                    </a>
+                </li>
+                <li th:style="${boardList.last} ? 'display-none'">
+                    <a th:href="@{/board/list(page=${boardList.number} + 2)}">&rsaquo;</a>
+                </li>
+                <li>
+                    <a th:href="@{/board/list(page=${boardList.totalPages})}">&rsaquo;</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 
     <div th:replace="layout/footer::footer"></div>
