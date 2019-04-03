@@ -1,0 +1,30 @@
+facebook:
+  client:
+    clientId: 449398939130673
+    clientSecret: 8146a350888e2f121e251ca262834fbd
+    accessTokenUri: https://graph.facebook.com/oauth/access_token
+    userAuthorizationUri: https://www.facebook.com/dialog/oauth?display=popup
+    tokenName: oauth_token
+    authenticationScheme: query
+    clientAuthenticationScheme: form
+    scope: email
+  resource:
+    userInfoUri: https://graph.facebook.com/me?fields=id,name,email,link    # 페이스북은 scope이 아닌 여기서 원하는 정보 명시
+
+google:
+  client:
+    clientId: 494606077602-ngb5fq9idpvp43272sqc1n0qdfvrb1h8.apps.googleusercontent.com
+    clientSecret: 09QIywfKoI4i-Sr-2BkI1k1p
+    accessTokenUri: https://accounts.goggle.com/o/oauth2/token
+    userAuthorizationUri: https://accounts.google.com/o/oauth2/auth
+    scope: email, profile
+  resource:
+    userInfoUri: https://www.googleapis.com/oauth2/v2/userinfo
+
+kakao:
+  client:
+    clientId: 406bf84ab6137543f727b172798ad11d
+    accessTokenUri: https://kauth.kakao.com/oauth/token
+    userAuthorizationUri: https://kauth.kakao.com/oauth/authorize
+  resource:
+    userInfoUri: https://kapi.kakao.com/v1/user/me

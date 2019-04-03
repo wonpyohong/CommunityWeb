@@ -1,6 +1,7 @@
 package com.web.domain
 
 import com.web.domain.enums.BoardType
+import com.web.domain.enums.SocialType
 import java.io.Serializable
 import java.time.LocalDateTime
 import javax.persistence.*
@@ -21,6 +22,13 @@ data class User(
 
         @Column
         val email: String,
+
+        @Column
+        val principal: String,
+
+        @Column
+        @Enumerated(EnumType.STRING)
+        val socialType: SocialType,
 
         @Column
         val createdDate: LocalDateTime,
