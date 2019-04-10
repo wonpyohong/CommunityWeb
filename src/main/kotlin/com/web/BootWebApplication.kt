@@ -5,14 +5,25 @@ import com.web.domain.User
 import com.web.domain.enums.BoardType
 import com.web.repository.BoardRepository
 import com.web.repository.UserRepository
+import com.web.resolver.UserArgumentResolver
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
+import org.springframework.web.method.support.HandlerMethodArgumentResolver
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import java.time.LocalDateTime
 
 @SpringBootApplication
-class BootWebApplication {
+class BootWebApplication: WebMvcConfigurerAdapter() {
+    @Autowired
+    lateinit var userArgumentResolver: UserArgumentResolver
+
+    override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver>?) {
+        argumentResolvers?.add(userArgumentResolver)
+    }
+
     @Bean
     fun runner(userRepository: UserRepository, boardRepository: BoardRepository): CommandLineRunner {
         return CommandLineRunner{ args ->
@@ -21,8 +32,8 @@ class BootWebApplication {
                             "havi",
                             "test",
                             "email",
-                            LocalDateTime.now(),
-                            LocalDateTime.now()
+                            createdDate = LocalDateTime.now(),
+                            updatedDate = LocalDateTime.now()
                     )
             )
 
@@ -43,5 +54,5 @@ class BootWebApplication {
 }
 
 fun main(args: Array<String>) {
-    runApplication<BootWebApplication>(*args)
+    SpringApplication.run(BootWebApplication::class.java, *args)
 }

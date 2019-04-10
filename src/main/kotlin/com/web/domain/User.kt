@@ -18,17 +18,17 @@ data class User(
         val name: String,
 
         @Column
-        val password: String,
+        val password: String = "",
 
         @Column
-        val email: String,
+        val email: String = "",
 
         @Column
-        val principal: String,
+        val principal: String = "",
 
         @Column
         @Enumerated(EnumType.STRING)
-        val socialType: SocialType,
+        val socialType: SocialType = SocialType.FACEBOOK,
 
         @Column
         val createdDate: LocalDateTime,
