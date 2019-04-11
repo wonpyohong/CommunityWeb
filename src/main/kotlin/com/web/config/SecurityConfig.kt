@@ -20,11 +20,11 @@ import java.util.*
 
 @Configuration
 @EnableWebSecurity          // 웹에서 시큐리티 기능을 사용하겠다는 어노테이션
-class SecurityConfig: WebSecurityConfigurerAdapter() {      // 원하는 형식의 시큐리티 설정을 위해 (override configure를 위해)
+class SecurityConfig: WebSecurityConfigurerAdapter() {      // 원하는 형식의 시큐리티 설정을 위해 상속 (override configure를 위해)
     override fun configure(http: HttpSecurity) {
         val filter = CharacterEncodingFilter()
         http.authorizeRequests()
-                .antMatchers("/", "/oauth2/**", "/login/**", "/css/**", "/images/**", "/js/**", "/console/**").permitAll()
+                .antMatchers("/", "/oauth2/**", "/login/**", "/css/**", "/images/**", "/js/**", "/console/**").permitAll()      // login.html에서 버튼 누르면 시작
                 .antMatchers("/facebook").hasAuthority(SocialType.FACEBOOK.getRoleType())
                 .antMatchers("/google").hasAuthority(SocialType.GOOGLE.getRoleType())
                 .antMatchers("/kakao").hasAuthority(SocialType.KAKAO.getRoleType())
@@ -50,7 +50,7 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {      // 원하는 형식�
                 .invalidateHttpSession(true)
             .and()
                 .addFilterBefore(filter, CsrfFilter::class.java)        // 문자 인코딩 필터(filter)보다 CsrfFilter를 먼저 실행하도록 설정
-                .csrf().disable()
+                .csrf().disable()           // csrf: Cross-site request forgery (사이트 간 요청 위조)
     }
 
     @Bean
@@ -70,6 +70,7 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {      // 원하는 형식�
         return InMemoryClientRegistrationRepository(registrations)
     }
 
+    // 스프링 부트에서 제공되는 기본 설정(CommonOAuth2Provider)에 커스텀 설정을 더한다
     fun getRegistration(clientProperties: OAuth2ClientProperties, client: String): ClientRegistration? {
         if (client == "google") {
             val registration = clientProperties.registration["google"]!!

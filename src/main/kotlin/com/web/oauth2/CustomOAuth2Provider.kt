@@ -26,7 +26,7 @@ enum class CustomOAuth2Provider {
     protected fun getBuilder(registrationId: String, method: ClientAuthenticationMethod, redirectUri: String): ClientRegistration.Builder {
         val builder = ClientRegistration.withRegistrationId(registrationId)
         builder.clientAuthenticationMethod(method)
-        builder.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+        builder.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)           // 책에서 설명한 승인 타입 4가지 중 하나
         builder.redirectUriTemplate(redirectUri)
         return builder
     }

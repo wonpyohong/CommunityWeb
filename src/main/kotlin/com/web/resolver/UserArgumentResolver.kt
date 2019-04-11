@@ -22,7 +22,7 @@ import javax.servlet.http.HttpSession
 
 @Component
 class UserArgumentResolver(val userRepository: UserRepository): HandlerMethodArgumentResolver {
-    override fun supportsParameter(parameter: MethodParameter): Boolean {
+    override fun supportsParameter(parameter: MethodParameter): Boolean {           // MethodParameter객체에는 실제 값(User의 field 내용)이 아닌 Parameter의 속성만 본
         return parameter.getParameterAnnotation(SocialUser::class.java) != null
         && parameter.parameterType == User::class.java
     }
@@ -38,6 +38,7 @@ class UserArgumentResolver(val userRepository: UserRepository): HandlerMethodArg
     private fun getUserFromRepository(session: HttpSession): User? {
         var userFromRepository: User? = null
         try {
+            // 인증 완료(소셜 미디어에서 User 정보까지 가져온 상태) 되면 SecurityContextHolder에 그 정보가 담겨 있다
             val authentication = SecurityContextHolder.getContext().authentication as OAuth2AuthenticationToken     // 2.0에서는 액세스 토큰까지 제공한다는 의미에서 Token이 붙었다
             val map = authentication.principal.attributes as Map<String, Object>
             val convertUser = convertUser(authentication.authorizedClientRegistrationId, map)
@@ -85,7 +86,8 @@ class UserArgumentResolver(val userRepository: UserRepository): HandlerMethodArg
 
     private fun setRoleIfNotSame(user: User?, authentication: OAuth2AuthenticationToken, map: Map<String, Object>) {
         if (user != null && !authentication.authorities.contains(SimpleGrantedAuthority(user.socialType.getRoleType()))) {
-            SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(map, "N/A", AuthorityUtils.createAuthorityList(user.socialType.getRoleType()))
+            SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken(
+                    map, "N/A", AuthorityUtils.createAuthorityList(user.socialType.getRoleType()))
         }
     }
 }
