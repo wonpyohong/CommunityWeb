@@ -1,41 +1,39 @@
 package com.web.config
 
 import com.web.domain.enums.SocialType
-import com.web.oauth.ClientResources
-import com.web.oauth.UserTokenService
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.web.servlet.FilterRegistrationBean
+import com.web.oauth2.CustomOAuth2Provider
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.oauth2.client.OAuth2ClientContext
-import org.springframework.security.oauth2.client.OAuth2RestTemplate
-import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter
-import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client
+import org.springframework.security.config.oauth2.client.CommonOAuth2Provider
+import org.springframework.security.oauth2.client.registration.ClientRegistration
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import org.springframework.security.web.csrf.CsrfFilter
 import org.springframework.web.filter.CharacterEncodingFilter
-import org.springframework.web.filter.CompositeFilter
-import javax.servlet.Filter
+import java.util.*
 
 @Configuration
 @EnableWebSecurity          // 웹에서 시큐리티 기능을 사용하겠다는 어노테이션
-@EnableOAuth2Client
 class SecurityConfig: WebSecurityConfigurerAdapter() {      // 원하는 형식의 시큐리티 설정을 위해 (override configure를 위해)
-    @Autowired
-    lateinit var oAuth2ClientContext: OAuth2ClientContext
-
     override fun configure(http: HttpSecurity) {
         val filter = CharacterEncodingFilter()
         http.authorizeRequests()
-                .antMatchers("/", "/login/**", "/css/**", "/images/**", "/js/**", "/console/**").permitAll()
+                .antMatchers("/", "/oauth2/**", "/login/**", "/css/**", "/images/**", "/js/**", "/console/**").permitAll()
+                .antMatchers("/facebook").hasAuthority(SocialType.FACEBOOK.getRoleType())
+                .antMatchers("/google").hasAuthority(SocialType.GOOGLE.getRoleType())
+                .antMatchers("/kakao").hasAuthority(SocialType.KAKAO.getRoleType())
                 .anyRequest()           // 설정한 요청 이외의 리퀘스트 요청
                 .authenticated()        // 해당 요청은 인증된 사용자만 가능
+            .and()
+                .oauth2Login()
+                .defaultSuccessUrl("/loginSuccess")
+                .failureUrl("/loginFailure")
             .and()
                 .headers().frameOptions().disable()     // XFrameOptionsHeaderWriter의 최적화 설정을 허용하지 않음
             .and()
@@ -52,51 +50,48 @@ class SecurityConfig: WebSecurityConfigurerAdapter() {      // 원하는 형식�
                 .invalidateHttpSession(true)
             .and()
                 .addFilterBefore(filter, CsrfFilter::class.java)        // 문자 인코딩 필터(filter)보다 CsrfFilter를 먼저 실행하도록 설정
-                .addFilterBefore(oauth2Filter(), BasicAuthenticationFilter::class.java)
+                .csrf().disable()
     }
 
     @Bean
-    fun oauth2ClientFilterRegistration(filter: OAuth2ClientContextFilter): FilterRegistrationBean {
-        val registration = FilterRegistrationBean()
-        registration.filter = filter
-        registration.order = -100
-        return registration
+    fun clientRegistrationRepository(oAuth2ClientProperties: OAuth2ClientProperties,
+                                     @Value("\${custom.oauth2.kakao.client-id}") kakaoClientId: String)
+    : ClientRegistrationRepository {
+        val registrations = oAuth2ClientProperties.registration.keys
+                .map { client -> getRegistration(oAuth2ClientProperties, client) }
+                .filter(Objects::nonNull).toMutableList()
+
+        registrations.add(CustomOAuth2Provider.KAKAO.getBuilder("kakao")
+                .clientId(kakaoClientId)
+                .clientSecret("test")
+                .jwkSetUri("test")
+                .build())
+
+        return InMemoryClientRegistrationRepository(registrations)
     }
 
-    fun oauth2Filter(): Filter {
-        val filter = CompositeFilter()
-        val filters = mutableListOf<Filter>()
-        filters.add(oauth2Filter(facebook(), "/login/facebook", SocialType.FACEBOOK))
-        filters.add(oauth2Filter(google(), "/login/google", SocialType.GOOGLE))
-        filters.add(oauth2Filter(kakao(), "/login/kakao", SocialType.KAKAO))
-        filter.setFilters(filters)
-        return filter
-    }
+    fun getRegistration(clientProperties: OAuth2ClientProperties, client: String): ClientRegistration? {
+        if (client == "google") {
+            val registration = clientProperties.registration["google"]!!
 
-    fun oauth2Filter(client: ClientResources, path: String, socialType: SocialType): Filter {
-        val filter = OAuth2ClientAuthenticationProcessingFilter(path)
-        val template = OAuth2RestTemplate(client.client, oAuth2ClientContext)
-        filter.setRestTemplate(template)
-        filter.setTokenServices(UserTokenService(client, socialType))
-        filter.setAuthenticationSuccessHandler { resquest, response, authenication ->
-            response.sendRedirect("/" + socialType.value + "/complete")
-        }
-        filter.setAuthenticationFailureHandler {resquest, response, exception ->
-            response.sendRedirect("/error")
+            return CommonOAuth2Provider.GOOGLE.getBuilder(client)
+                    .clientId(registration.clientId)
+                    .clientSecret(registration.clientSecret)
+                    .scope("email", "profile")
+                    .build()
         }
 
-        return filter
+        if (client == "facebook") {
+            val registration = clientProperties.registration["facebook"]!!
+
+            return CommonOAuth2Provider.FACEBOOK.getBuilder(client)
+                    .clientId(registration.clientId)
+                    .clientSecret(registration.clientSecret)
+                    .userInfoUri("https://graph.facebook.com/me?fields=id,name,email,link")
+                    .scope("email")
+                    .build()
+        }
+
+        return null
     }
-
-    @Bean
-    @ConfigurationProperties("facebook")            // 프로퍼티의 접두사(facebook:)
-    fun facebook() = ClientResources()
-
-    @Bean
-    @ConfigurationProperties("google")
-    fun google() = ClientResources()
-
-    @Bean
-    @ConfigurationProperties("kakao")
-    fun kakao() = ClientResources()
 }

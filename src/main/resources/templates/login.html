@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
 </head>
 <body>
-    <div th:replace="layout/headder::header"></div>
+    <div th:replace="layout/header::header"></div>
 
     <div class="container" style="text-align: center;">
         <br />
@@ -19,10 +19,11 @@
 
     <div th:replace="layout/footer::footer"></div>
 
+    <script th:src="@{/js/jquery.min.js}"></script>
     <script>
         $('.btn_social').click(function() {
             var socialType = $(this).data('social');
-            location.href="/login/"+socialType
+            location.href="/oauth2/authorization/"+socialType
         });
     </script>
 

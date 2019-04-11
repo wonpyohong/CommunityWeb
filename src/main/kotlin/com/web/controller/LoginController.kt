@@ -10,7 +10,7 @@ class LoginController {
     @GetMapping("/login")
     fun login() = "login"
 
-    @GetMapping(value = ["/{facebook|google|kakao}/complete"])      // 허용되는 URL 매핑은 3가지로 제한함
+    @GetMapping("/loginSuccess")
     fun loginComplete(@SocialUser user: User): String {
         return "redirect:/board/list"
     }

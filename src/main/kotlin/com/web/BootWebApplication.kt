@@ -20,8 +20,8 @@ class BootWebApplication: WebMvcConfigurerAdapter() {
     @Autowired
     lateinit var userArgumentResolver: UserArgumentResolver
 
-    override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver>?) {
-        argumentResolvers?.add(userArgumentResolver)
+    override fun addArgumentResolvers(argumentResolvers: MutableList<HandlerMethodArgumentResolver>) {
+        argumentResolvers.add(userArgumentResolver)
     }
 
     @Bean
