@@ -9,6 +9,22 @@ spring:
           google:
               client-id: 494606077602-ngb5fq9idpvp43272sqc1n0qdfvrb1h8.apps.googleusercontent.com
               client-secret: 09QIywfKoI4i-Sr-2BkI1k1p
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/board?serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create    #어플리케이션이 구동될 때마다 기존 테이블을 삭제하고 다시 생성
+  h2:
+    console:
+      enabled: false
+      path: /console
+  devtools:
+    livereload:
+      enabled: true
+
 custom:
   oauth2:
     kakao:
