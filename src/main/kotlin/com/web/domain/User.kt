@@ -35,4 +35,5 @@ data class User(
 
         @Column
         val updatedDate: LocalDateTime = LocalDateTime.now()
+
 ): Serializable
